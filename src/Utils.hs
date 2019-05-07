@@ -36,7 +36,7 @@ emptyTag name = XMLTag (name,[]) [] False
 getName :: BSL.ByteString -> BSL.ByteString
 getName xml = cs $ takeWhile (/=' ') $ drop 1 $ cs xml
 
-coordsToName :: CellCoords -> String
+coordsToName :: CellCoords -> CellName
 coordsToName (c, r) =  (int2col c) <> (cs $ show r)
 
 -- | convert column number (starting from 1) to its textual form (e.g. 3 -> \"C\")

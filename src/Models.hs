@@ -12,8 +12,6 @@ type StyleID = Int
 
 type CellCoords = (Int, Int)
 
-type CellName = Text
-
 data Merge = Merge Range deriving (Show)
 
 type Range = (CellCoords, CellCoords)
@@ -25,6 +23,8 @@ type TagBody = [XMLTag]
 type TagEnd = Bool
 
 type Attr = (String, String)
+
+type CellName = String
 
 -- ** Document
 
