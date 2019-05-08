@@ -96,7 +96,6 @@ grayBorder = Border
 testTable :: Xlsx
 testTable = Xlsx
   { worksheets = [ws1 "Лист 1", ws1 "Лист 2"]
-  , styleMap = empty
   }
   where
     ws1 n = Worksheet

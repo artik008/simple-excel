@@ -32,7 +32,6 @@ type CellName = String
 
 data Xlsx = Xlsx
   { worksheets :: [Worksheet]
-  , styleMap   :: Map Int Style
   }
   deriving (Show)
 
@@ -93,8 +92,6 @@ data SheetFormat = SheetFormat
   deriving (Show)
 
 -- | Styles
-
-type Style = Map Int CellXf
 
 data CellXf = CellXf
   { border    :: Maybe Border
