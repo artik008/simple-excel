@@ -31,7 +31,7 @@ type CellName = String
 -- | XLSX
 
 data Xlsx = Xlsx
-  { worksheets :: [Worksheet]
+  { worksheets :: [Worksheet]  -- FIXME map of worksheets
   }
   deriving (Show)
 

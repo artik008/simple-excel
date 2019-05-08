@@ -145,4 +145,6 @@ countDimension cells fix =
   , (checkRange 5 maximum fst, checkRange 10 maximum snd)
   )
   where
-    checkRange def minmax cell = if fix then def else minmax $ map cell cells
+    checkRange def minmax cell =
+      let first = if fix then [def] else []
+        in minmax $ first ++ (map cell cells)
