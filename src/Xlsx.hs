@@ -17,6 +17,7 @@ import qualified Data.Text               as T
 import           NeatInterpolation
 import           System.Directory
 
+import           Defaults
 import           FileCreating
 import           Indexing
 import           Instances
@@ -26,7 +27,10 @@ createXlsx :: FilePath -> Xlsx -> IO BSL.ByteString
 createXlsx fname xlsx@Xlsx{..} = do
   files <- filesInDir fname
   let WithHistory indWorksheets indStyles sharedStrings =
-        foldl addIndWorkSheet (WithHistory [] empty empty) worksheets
+        foldl
+          addIndWorkSheet
+          (WithHistory [] (singleton defStyle 0) empty)
+          worksheets
       wshs = map sheetToXml $ zip (reverse indWorksheets) [1..]
   openedFiles <- sequence $
     map
