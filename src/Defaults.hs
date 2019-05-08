@@ -89,12 +89,95 @@ defStyle = CellXf
   , alignment = Nothing
   }
 
+defTopStyle :: CellXf
+defTopStyle = CellXf
+  { border    = Just defTopBorder
+  , fill      = Nothing
+  , font      = Just $ Font "Helvetica Neue" False False 12 "000000" VCenter
+  , numFmt    = Nothing
+  , alignment = Nothing
+  }
+
+defBottomStyle :: CellXf
+defBottomStyle = CellXf
+  { border    = Just defBottomBorder
+  , fill      = Nothing
+  , font      = Just $ Font "Helvetica Neue" False False 12 "000000" VCenter
+  , numFmt    = Nothing
+  , alignment = Nothing
+  }
+
+defLeftStyle :: CellXf
+defLeftStyle = CellXf
+  { border    = Just defLeftBorder
+  , fill      = Nothing
+  , font      = Just $ Font "Helvetica Neue" False False 12 "000000" VCenter
+  , numFmt    = Nothing
+  , alignment = Nothing
+  }
+
+defRightStyle :: CellXf
+defRightStyle = CellXf
+  { border    = Just defRightBorder
+  , fill      = Nothing
+  , font      = Just $ Font "Helvetica Neue" False False 12 "000000" VCenter
+  , numFmt    = Nothing
+  , alignment = Nothing
+  }
 
 defBorder :: Border
 defBorder = Border
   { borderStyles =
      [
        Just $ BorderStyle BLeft Thin (RGB "ffffff")
+     , Just $ BorderStyle BRight Thin (RGB "ffffff")
+     , Just $ BorderStyle BTop Thin (RGB "ffffff")
+     , Just $ BorderStyle BBottom Thin (RGB "ffffff")
+     , Just $ BorderStyle BDiagonal Thin (RGB "ffffff")
+     ]
+  }
+
+defTopBorder :: Border
+defTopBorder = Border
+  { borderStyles =
+     [
+       Just $ BorderStyle BLeft Thin (RGB "ffffff")
+     , Just $ BorderStyle BRight Thin (RGB "ffffff")
+     , Just $ BorderStyle BTop Thin (RGB "ffffff")
+     , Just $ BorderStyle BBottom Thin (RGB "808080")
+     , Just $ BorderStyle BDiagonal Thin (RGB "ffffff")
+     ]
+  }
+
+defBottomBorder :: Border
+defBottomBorder = Border
+  { borderStyles =
+     [
+       Just $ BorderStyle BLeft Thin (RGB "ffffff")
+     , Just $ BorderStyle BRight Thin (RGB "ffffff")
+     , Just $ BorderStyle BTop Thin (RGB "808080")
+     , Just $ BorderStyle BBottom Thin (RGB "ffffff")
+     , Just $ BorderStyle BDiagonal Thin (RGB "ffffff")
+     ]
+  }
+
+defLeftBorder :: Border
+defLeftBorder = Border
+  { borderStyles =
+     [
+       Just $ BorderStyle BLeft Thin (RGB "ffffff")
+     , Just $ BorderStyle BRight Thin (RGB "808080")
+     , Just $ BorderStyle BTop Thin (RGB "ffffff")
+     , Just $ BorderStyle BBottom Thin (RGB "ffffff")
+     , Just $ BorderStyle BDiagonal Thin (RGB "ffffff")
+     ]
+  }
+
+defRightBorder :: Border
+defRightBorder = Border
+  { borderStyles =
+     [
+       Just $ BorderStyle BLeft Thin (RGB "808080")
      , Just $ BorderStyle BRight Thin (RGB "ffffff")
      , Just $ BorderStyle BTop Thin (RGB "ffffff")
      , Just $ BorderStyle BBottom Thin (RGB "ffffff")

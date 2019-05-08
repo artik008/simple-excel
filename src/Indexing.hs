@@ -103,7 +103,7 @@ fillCells cells merges range =
       (\oldc1 y -> foldl
         (\oldc2 x ->
           if notMember (x, y) oldc2
-          then insert (x, y) (Cell Nothing defStyle) oldc2
+          then insert (x, y) (Cell Nothing (chooseStyle (x, y))) oldc2
           else oldc2
         )
         oldc1
@@ -115,6 +115,12 @@ fillCells cells merges range =
     merges
   where
     ((minC, minR), (maxC, maxR)) = range
+    chooseStyle (x, y)
+      | x >= minC && x <= maxC && y == (minR - 1) = defTopStyle
+      | x >= minC && x <= maxC && y == (maxR + 1) = defBottomStyle
+      | y >= minR && y <= maxR && x == (minC - 1) = defLeftStyle
+      | y >= minR && y <= maxR && x == (maxC + 1) = defRightStyle
+      | otherwise = defStyle
 
 setMergeStyle :: Map CellCoords Cell -> Merge -> Map CellCoords Cell
 setMergeStyle cells (Merge ((mC1, mR1), (mC2, mR2))) =
