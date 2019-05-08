@@ -93,11 +93,7 @@ addIndWorkSheet (WithHistory l indexedStyles sharedStrings) Worksheet{..} =
           )
         ) $
         toList $
-          if wsStyleFix
-          then
-            foldl
-              (\x y -> insert y defRowConfig x) wsRowsConfig [minR..maxR]
-            else wsRowsConfig
+          foldl (\x y -> insert y defRowConfig x) wsRowsConfig [minR..maxR]
     filledCells = fillCells wsCells wsMergeCells dim
 
 fillCells :: Map CellCoords Cell -> [Merge] -> Range -> Map CellCoords Cell
