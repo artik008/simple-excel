@@ -144,9 +144,9 @@ setMergeStyle cells (Merge ((mC1, mR1), (mC2, mR2))) =
     mergeStyle = cellStyle $ fromJust $ lookup (minC, minR) cells
     minR = min mR1 mR2
     minC = min mC1 mC2
-    changeStyle x y oldcells =
+    changeStyle x y oldcells = if (x,y) == (minC, minR) then oldcells else
       let c = oldcells!(x,y)
-        in insert (x,y) c{cellStyle = mergeStyle} oldcells
+        in insert (x,y) c{cellStyle = mergeStyle, cellValue = Nothing} oldcells
 
 countDimension :: [CellCoords] -> Bool -> Range
 countDimension [] _ = ((1,1),(5,10)) -- FIXME
