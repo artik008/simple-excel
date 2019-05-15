@@ -12,7 +12,7 @@ type StyleID = Int
 
 type CellCoords = (Int, Int)
 
-data Merge = Merge Range deriving (Show)
+data Merge = Merge Range deriving (Show, Eq)
 
 type Range = (CellCoords, CellCoords)
 
@@ -33,7 +33,7 @@ type CellName = String
 data Xlsx = Xlsx
   { worksheets :: [Worksheet]  -- FIXME map of worksheets
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- | Worksheets
 
@@ -49,7 +49,7 @@ data Worksheet = Worksheet
   , wsSheetViews     :: [SheetView]
   , wsSheetFormat    :: SheetFormat
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 data IndexedWorksheet = IndexedWorksheet
   { iwsName           :: String
@@ -61,26 +61,26 @@ data IndexedWorksheet = IndexedWorksheet
   , iwsSheetViews     :: [SheetView]
   , iwsSheetFormat    :: SheetFormat
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 data IndRow = IndRow
   { irowNumber :: Int
   , irowConfig :: RowConfig
   , irowCells  :: [IndCell]
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 data PageSetup = PageSetup
   { psFitToPage :: Int
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 data SheetView = SheetView
   { svDefaultGridColor :: Int
   , svShowGridLines    :: Int
   , svWorkbookViewId   :: Int
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 data SheetFormat = SheetFormat
   { sfCustomHeight     :: Float
@@ -90,7 +90,7 @@ data SheetFormat = SheetFormat
   , sfOutlineLevelRow  :: Int
   , sfX14Descent       :: Float
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- | Styles
 
@@ -201,26 +201,26 @@ data Cell = Cell
   { cellValue :: Maybe CellValue
   , cellStyle :: CellXf
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 data IndCell = IndCell
   { icellValue  :: Maybe IndCellValue
   , icellStyle  :: Int
   , icellCoords :: CellCoords
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 data IndCellValue
   = IndCellText Int
   | IndCellFloat Float
   | IndCellFormula Text (Maybe Text)
-  deriving (Show)
+  deriving (Show, Eq)
 
 data CellValue
   = CellText Text
   | CellFloat Float
   | CellFormula Text (Maybe Text)
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- | Rows and Columns properties
 
@@ -232,7 +232,7 @@ data RowConfig = RowConfig
   , rowHeight       :: Int
   , rowOutlineLevel :: Int
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 
 data ColumnConfig = ColumnConfig
@@ -242,7 +242,7 @@ data ColumnConfig = ColumnConfig
   , columnFirstColumn :: Int
   , columnWidth       :: Int
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 
 -- | Additional files
@@ -252,13 +252,13 @@ data Relationship = Relationship
   , relTarget :: FilePath
   , relType   :: URL
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 data Override = Override
   { orContentType :: String
   , orPartName    :: FilePath
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- | XMLTag
 
@@ -267,7 +267,7 @@ data XMLTag
   | XMLFloat Float
   | XMLInt Int
   | XMLText Text
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- | Indexes history
 
