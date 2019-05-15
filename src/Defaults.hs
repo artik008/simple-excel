@@ -189,4 +189,4 @@ defRowConfig :: RowConfig
 defRowConfig = RowConfig False True False False 20 1
 
 fileHeader :: ByteString
-fileHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+fileHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"  standalone=\"yes\"?>"

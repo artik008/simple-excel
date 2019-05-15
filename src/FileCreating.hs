@@ -17,8 +17,11 @@ sheetToXml (IndexedWorksheet{..}, wsID) =
     xml = (-++) fileHeader $
       simpleTag
         ( "worksheet"
-        , [ ("xmlns","http://schemas.openxmlformats.org/spreadsheetml/2006/main")
+        , [ ("mc:Ignorable","x14ac")
+          , ("xmlns","http://schemas.openxmlformats.org/spreadsheetml/2006/main")
+          , ("xmlns:mc","http://schemas.openxmlformats.org/markup-compatibility/2006")
           , ("xmlns:r","http://schemas.openxmlformats.org/officeDocument/2006/relationships")
+          , ("xmlns:x14ac","http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac")
           ]
         )
       <<<
@@ -103,7 +106,19 @@ createSharedStrings hist = (-++) fileHeader $
 createStylesFile :: StyleHistory -> ByteString
 createStylesFile hist = (-++) fileHeader $
   simpleTag
-    ("styleSheet",[("xmlns","http://schemas.openxmlformats.org/spreadsheetml/2006/main")])
+    ("styleSheet"
+    ,[
+       ("xmlns","http://schemas.openxmlformats.org/spreadsheetml/2006/main")
+     , ("mc:Ignorable","x14ac")
+     , ("xmlns:mc","http://schemas.openxmlformats.org/markup-compatibility/2006")
+     , ("xmlns:x14ac","http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac")
+     ]
+    )
+  <++
+    (simpleTag
+      ("fonts", countAttr ssFonts)
+      <<< (sortMapToList ssFonts)
+    )
   <++
     (simpleTag
       ("borders", countAttr ssBorders)
@@ -113,11 +128,6 @@ createStylesFile hist = (-++) fileHeader $
     (simpleTag
       ("fills", countAttr ssFills)
       <<< (sortMapToList ssFills)
-    )
-  <++
-    (simpleTag
-      ("fonts", countAttr ssFonts)
-      <<< (sortMapToList ssFonts)
     )
   <++
     (simpleTag

@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 module Indexing where
 
-import           Data.Map   hiding (foldl, map)
+import           Data.Map   hiding (filter, foldl, map)
 import           Data.Maybe (fromJust, fromMaybe)
 import           Prelude    hiding (lookup)
 
@@ -75,7 +75,7 @@ addIndWorkSheet (WithHistory l indexedStyles sharedStrings) Worksheet{..} =
       , iwsDimension      = dim
       , iwsRows           = reverse indexedRows
       , iwsColumnsConfigs = wsColumnsConfigs
-      , iwsMergeCells     = wsMergeCells
+      , iwsMergeCells     = fMergeCells
       , iwsPageSetups     = wsPageSetups
       , iwsSheetViews     = wsSheetViews
       , iwsSheetFormat    = wsSheetFormat
@@ -83,8 +83,9 @@ addIndWorkSheet (WithHistory l indexedStyles sharedStrings) Worksheet{..} =
     WithHistory indexedRows newIndStyles newSharedStrings =
       foldl addIndexedRow (WithHistory [] indexedStyles sharedStrings) rowsList
     dim@((minC, minR), (maxC, maxR)) = countDimension activeCells wsStyleFix
+    activeDim = countDimension activeCells False
     activeCells = ((keys wsCells)) ++
-      (concat $ map (\(Merge (c1,c2)) -> [c1, c2]) wsMergeCells)
+      (concat $ map (\(Merge (c1,c2)) -> [c1, c2]) fMergeCells)
     rowsList =
       map
         (\(num, conf) ->
@@ -94,10 +95,16 @@ addIndWorkSheet (WithHistory l indexedStyles sharedStrings) Worksheet{..} =
         ) $
         toList $
           foldl (\x y -> insert y defRowConfig x) wsRowsConfig [minR..maxR]
-    filledCells = fillCells wsCells wsMergeCells dim
+    filledCells = fillCells wsCells fMergeCells dim activeDim
+    fMergeCells = filter (\(Merge (f,l)) -> f /= l) wsMergeCells
 
-fillCells :: Map CellCoords Cell -> [Merge] -> Range -> Map CellCoords Cell
-fillCells cells merges range =
+fillCells
+  :: Map CellCoords Cell
+  -> [Merge]
+  -> Range
+  -> Range
+  -> Map CellCoords Cell
+fillCells cells merges range actRange =
     foldl setMergeStyle
     (foldl
       (\oldc1 y -> foldl
@@ -115,11 +122,12 @@ fillCells cells merges range =
     merges
   where
     ((minC, minR), (maxC, maxR)) = range
+    ((aminC, aminR), (amaxC, amaxR)) = actRange
     chooseStyle (x, y)
-      | x >= minC && x <= maxC && y == (minR - 1) = defTopStyle
-      | x >= minC && x <= maxC && y == (maxR + 1) = defBottomStyle
-      | y >= minR && y <= maxR && x == (minC - 1) = defLeftStyle
-      | y >= minR && y <= maxR && x == (maxC + 1) = defRightStyle
+      | x >= aminC && x <= amaxC && y == (aminR - 1) = defTopStyle
+      | x >= aminC && x <= amaxC && y == (amaxR + 1) = defBottomStyle
+      | y >= aminR && y <= amaxR && x == (aminC - 1) = defLeftStyle
+      | y >= aminR && y <= amaxR && x == (amaxC + 1) = defRightStyle
       | otherwise = defStyle
 
 setMergeStyle :: Map CellCoords Cell -> Merge -> Map CellCoords Cell

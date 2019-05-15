@@ -108,7 +108,13 @@ testTable = Xlsx
       , wsCells          = fromList
         [
           ((1,1), Cell (Just $ CellText "0")                   headerStyle)
-        , ((2,2), Cell (Just $ CellFloat 40.2)                 headerStyle)
+        , ((1,2), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
+        , ((1,3), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
+        , ((2,1), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
+        , ((2,2), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
+        , ((2,3), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
+        , ((3,1), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
+        , ((3,2), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
         , ((3,3), Cell (Just $ CellFormula "A1/B2" (Just "0")) headerStyle)
         ]
       , wsRowsConfig     = fromList
@@ -126,6 +132,7 @@ testTable = Xlsx
         , sfDefaultRowHeight = 12.75
         , sfOutlineLevelCol  = 0
         , sfOutlineLevelRow  = 0
+        , sfX14Descent       = 0.25
         }
       }
 

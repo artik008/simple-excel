@@ -88,6 +88,7 @@ data SheetFormat = SheetFormat
   , sfDefaultRowHeight :: Float
   , sfOutlineLevelCol  :: Int
   , sfOutlineLevelRow  :: Int
+  , sfX14Descent       :: Float
   }
   deriving (Show)
 

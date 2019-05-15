@@ -125,6 +125,7 @@ instance ToExcelXML SheetFormat where
         , ("defaultRowHeight", show sfDefaultRowHeight)
         , ("outlineLevelCol", show sfOutlineLevelCol)
         , ("outlineLevelRow", show sfOutlineLevelRow)
+        , ("x14ac:dyDescent", show sfX14Descent)
         ]
       )
 
