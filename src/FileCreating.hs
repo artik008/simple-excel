@@ -43,7 +43,7 @@ createWorkBook Xlsx{..} = (-++) fileHeader $
         ]
       )
     <<<
-    [ emptyTag "workbookPr"
+    [ simpleTag ("workbookPr", [("defaultThemeVersion","153222")])
     , emptyTag "bookViews" <++ emptyTag "workbookView"
     , emptyTag "sheets" <<< (map worksheetToWBTag $ zip [1..] worksheets)
     , emptyTag "definedNames"

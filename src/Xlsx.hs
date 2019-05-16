@@ -117,15 +117,16 @@ testTable = Xlsx
         , ((3,2), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
         , ((3,3), Cell (Just $ CellFormula "A1/B2" (Just "0")) headerStyle)
         ]
-      , wsRowsConfig     = fromList
-          [ (1, RowConfig False True False False 30 1)
-          , (2, RowConfig False True False False 50 1)
-          , (3, RowConfig False True False False 30 1)
-          ]
+      , wsRowsConfig     = empty
+        -- fromList
+          -- [ (1, RowConfig False True False False 30 1)
+          -- , (2, RowConfig False True False False 50 1)
+          -- , (3, RowConfig False True False False 30 1)
+          -- ]
       , wsColumnsConfigs = []
       , wsMergeCells     = [Merge ((1,1),(3,1))]
       , wsPageSetups = []
-      , wsSheetViews = []
+      , wsSheetViews = [SheetView 1 1 1]
       , wsSheetFormat = SheetFormat
         { sfCustomHeight     = 1
         , sfDefaultColWidth  = 8

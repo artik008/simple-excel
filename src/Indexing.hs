@@ -2,8 +2,11 @@
 module Indexing where
 
 import           Data.Map   hiding (filter, foldl, map)
+import qualified Data.Map   as Map
 import           Data.Maybe (fromJust, fromMaybe)
+import           Data.Tuple
 import           Prelude    hiding (lookup)
+
 
 import           Defaults
 import           Models
@@ -83,9 +86,13 @@ addIndWorkSheet (WithHistory l indexedStyles sharedStrings) Worksheet{..} =
     WithHistory indexedRows newIndStyles newSharedStrings =
       foldl addIndexedRow (WithHistory [] indexedStyles sharedStrings) rowsList
     dim@((minC, minR), (maxC, maxR)) = countDimension activeCells wsStyleFix
+    -- rdim@((minC, minR), (maxC, maxR)) = countDimension reversedActiveCells wsStyleFix
     activeDim = countDimension activeCells False
+    -- ractiveDim = countDimension reversedActiveCells False
     activeCells = ((keys wsCells)) ++
       (concat $ map (\(Merge (c1,c2)) -> [c1, c2]) fMergeCells)
+    -- reversedActiveCells = map swap activeCells
+    -- reversedMergeCells = map (\(Merge (c1, c2)) -> Merge (swap c1, swap c2)) fMergeCells
     rowsList =
       map
         (\(num, conf) ->
@@ -94,8 +101,10 @@ addIndWorkSheet (WithHistory l indexedStyles sharedStrings) Worksheet{..} =
           )
         ) $
         toList $
-          foldl (\x y -> insert y defRowConfig x) wsRowsConfig [minR..maxR]
+          foldl (\x y -> insert y defRowConfig x) wsRowsConfig [minR..maxR] -- FIXME
     filledCells = fillCells wsCells fMergeCells dim activeDim
+    -- reversedCells = Map.foldlWithKey
+      -- (\cells (x,y) c -> Map.insert (y,x) c cells) Map.empty filledCells
     fMergeCells = filter (\(Merge (f,l)) -> f /= l) wsMergeCells
 
 fillCells
