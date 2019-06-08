@@ -2,6 +2,7 @@
 module Models where
 
 import qualified Data.ByteString.Lazy    as BSL
+import           Data.Char               (toLower)
 import           Data.List               (intercalate)
 import           Data.Map                (Map)
 import           Data.String.Conversions (cs)
@@ -45,9 +46,11 @@ data Worksheet = Worksheet
   , wsRowsConfig     :: Map Int RowConfig
   , wsColumnsConfigs :: [ColumnConfig]
   , wsMergeCells     :: [Merge]
-  , wsPageSetups     :: [PageSetup]
+  , wsPageSetupPrs   :: [PageSetupPr]
   , wsSheetViews     :: [SheetView]
   , wsSheetFormat    :: SheetFormat
+  , wsPageMargins    :: PageMargins
+  , wsPageSetup      :: PageSetup
   }
   deriving (Show, Eq)
 
@@ -57,9 +60,11 @@ data IndexedWorksheet = IndexedWorksheet
   , iwsRows           :: [IndRow]
   , iwsColumnsConfigs :: [ColumnConfig]
   , iwsMergeCells     :: [Merge]
-  , iwsPageSetups     :: [PageSetup]
+  , iwsPageSetupPrs   :: [PageSetupPr]
   , iwsSheetViews     :: [SheetView]
   , iwsSheetFormat    :: SheetFormat
+  , iwsPageMargins    :: PageMargins
+  , iwsPageSetup      :: PageSetup
   }
   deriving (Show, Eq)
 
@@ -70,8 +75,8 @@ data IndRow = IndRow
   }
   deriving (Show, Eq)
 
-data PageSetup = PageSetup
-  { psFitToPage :: Int
+data PageSetupPr = PageSetupPr
+  { psprFitToPage :: Int
   }
   deriving (Show, Eq)
 
@@ -83,14 +88,70 @@ data SheetView = SheetView
   deriving (Show, Eq)
 
 data SheetFormat = SheetFormat
-  { sfCustomHeight     :: Float
+  { sfCustomHeight     :: Bool
   , sfDefaultColWidth  :: Float
   , sfDefaultRowHeight :: Float
   , sfOutlineLevelCol  :: Int
   , sfOutlineLevelRow  :: Int
-  , sfX14Descent       :: Float
+  -- , sfX14Descent       :: Float
   }
   deriving (Show, Eq)
+
+data PageMargins = PageMargins
+  { pmBottom :: Float
+  , pmFooter :: Float
+  , pmHeader :: Float
+  , pmLeft   :: Float
+  , pmRight  :: Float
+  , pmTop    :: Float
+  } deriving (Show, Eq)
+
+data PageSetup = PageSetup
+  { psFirstPageNumber    :: Int
+  , psFitToHeight        :: Int
+  , psFitToWidth         :: Int
+  , psOrientation        :: Orientation
+  , psPageOrder          :: PageOrder
+  , psScale              :: Int
+  , psUseFirstPageNumber :: Bool
+  } deriving (Show, Eq)
+
+data PageOrder = PODownThenOver | POOverThenDown deriving (Eq)
+
+instance Show PageOrder where
+  show PODownThenOver = "downThenOver"
+  show POOverThenDown = "overThenDown"
+
+data Orientation = OrDefault | OrPortrait | OrLandscape deriving (Eq)
+
+instance Show Orientation where
+  show OrDefault   = "default"
+  show OrPortrait  = "portrait"
+  show OrLandscape = "landscape"
+
+data AppVariant = AppVariant
+  { variantType  :: VariantType
+  , variantValue :: Text
+  }
+  deriving (Show)
+
+data VariantType =
+    VarVariant
+  | VarArray
+  | VarVector
+  | VarBlob
+  | VarOblob
+  | VarEmpty
+  | VarNull
+  | VarI1
+  | VarI2
+  | VarI4
+  | VarI8
+  | VarLpstr
+  -- FIXME add all types
+  deriving (Eq, Show)
+
+
 
 -- | Styles
 
@@ -144,8 +205,9 @@ instance Show Color where
   show (Indexed c) = show c
 
 data Fill = Fill
-  { fillType  :: Text
-  , fillColor :: Color
+  { fillType    :: Text
+  , fillFgColor :: Color
+  , fillBgColor :: Color
   }
   deriving (Show, Eq, Ord)
 
@@ -155,7 +217,7 @@ data Font = Font
   , fontOutline       :: Bool
   , fontSize          :: Int
   , fontColor         :: Color
-  , fontVertAlignment :: VertAlType
+  , fontVertAlignment :: FontVertAlType
   }
   deriving (Show, Eq, Ord)
 
@@ -174,6 +236,7 @@ data Alignment = Alignment
 
 data HorAlType = HCenter | HRight | HLeft deriving (Eq, Ord)
 data VertAlType = VCenter | Top | Bottom deriving (Eq, Ord)
+data FontVertAlType = Baseline | Superscript | Subscript deriving (Eq, Ord)
 
 instance Show HorAlType where
   show HCenter = "center"
@@ -184,6 +247,11 @@ instance Show VertAlType where
   show VCenter = "center"
   show Top     = "top"
   show Bottom  = "bottom"
+
+instance Show FontVertAlType where
+  show Baseline    = "baseline"
+  show Superscript = "superscript"
+  show Subscript   = "subscript"
 
 data StyleSheet = StyleSheet
   { ssBorders :: Map Border Int
@@ -236,11 +304,12 @@ data RowConfig = RowConfig
 
 
 data ColumnConfig = ColumnConfig
-  { columnBestFit     :: Int
-  , columnCustomWidth :: Int
+  { columnBestFit     :: Bool
+  , columnCustomWidth :: Bool
   , columnLastColumn  :: Int
   , columnFirstColumn :: Int
-  , columnWidth       :: Int
+  , columnWidth       :: Float
+  , columnStyle       :: Int
   }
   deriving (Show, Eq)
 
@@ -267,6 +336,7 @@ data XMLTag
   | XMLFloat Float
   | XMLInt Int
   | XMLText Text
+  | XMLBool Bool
   deriving (Show, Eq)
 
 -- | Indexes history
@@ -288,24 +358,4 @@ class (Show a) => ToExcelXML a where
     XMLTag (name,args) (toTag element:body) True
   (<<<) :: XMLTag -> [a] -> XMLTag
   (<<<) tag l = foldl (<++) tag l
-
-(-++) :: BSL.ByteString -> XMLTag -> BSL.ByteString
-(-++) bsl tag = bsl <> toXML tag
-
-toXML :: XMLTag -> BSL.ByteString
-toXML (XMLTag (name, args) body end) =
-  (
-    cs $
-      "<" <> name <> "\n" <>
-      (intercalate "\n" $
-          map (\(x,y) -> x <> "=\"" <> y <> "\"") args)
-  ) <>
-  if end
-    then ">" <>
-      BSL.intercalate "\n" (map toXML $ reverse body) <>
-      "\n</" <> cs name <> ">"
-    else "/>"
-toXML (XMLFloat v) = cs $ show v
-toXML (XMLInt v) = cs $ show v
-toXML (XMLText v) = cs v
 

@@ -2,71 +2,91 @@
 module Defaults where
 
 import           Data.ByteString.Lazy (ByteString)
+import           Data.Text            (Text, pack)
 
 import           Instances            ()
 import           Models
+import           Utils
 
 relSharedStrings :: Relationship
 relSharedStrings = Relationship
   { relID = 1
   , relTarget = "sharedStrings.xml"
-  , relType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings"
+  , relType = urlHeader <> "officeDocument/2006/relationships/sharedStrings"
   }
 
 relStyles :: Relationship
 relStyles = Relationship
   { relID = 2
   , relTarget = "styles.xml"
-  , relType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"
+  , relType = urlHeader <> "officeDocument/2006/relationships/styles"
   }
 
-relTheme :: Relationship
-relTheme = Relationship
+relWorkBook :: Relationship
+relWorkBook = Relationship
+  { relID = 1
+  , relTarget = "xl/workbook.xml"
+  , relType = urlHeader <> "officeDocument/2006/relationships/officeDocument"
+  }
+
+relCore :: Relationship
+relCore = Relationship
+  { relID = 2
+  , relTarget = "docProps/core.xml"
+  , relType =
+      urlHeader <> "officeDocument/2006/relationships/metadata/core-properties"
+  }
+
+relApp :: Relationship
+relApp = Relationship
   { relID = 3
-  , relTarget = "theme/theme1.xml"
-  , relType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme"
+  , relTarget = "docProps/app.xml"
+  , relType =
+      urlHeader <> "officeDocument/2006/relationships/extended-properties"
   }
 
 orWorkbook :: Override
 orWorkbook = Override
-  { orContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"
-  , orPartName="/xl/workbook.xml"
+  { orContentType =
+      appPathHead <> "officedocument.spreadsheetml.sheet.main+xml"
+  , orPartName = "/xl/workbook.xml"
   }
 
 orRelsWorkbook :: Override
 orRelsWorkbook = Override
-  { orContentType="application/vnd.openxmlformats-package.relationships+xml"
-  , orPartName="/xl/_rels/workbook.xml.rels"
+  { orContentType = appPathHead <> "package.relationships+xml"
+  , orPartName = "/xl/_rels/workbook.xml.rels"
   }
 
 orSharedStrings :: Override
 orSharedStrings = Override
-  { orContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"
-  , orPartName="/xl/sharedStrings.xml"
+  { orContentType =
+      appPathHead <> "officedocument.spreadsheetml.sharedStrings+xml"
+  , orPartName = "/xl/sharedStrings.xml"
   }
 
 orStyles :: Override
 orStyles = Override
-  { orContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"
-  , orPartName="/xl/styles.xml"
+  { orContentType = appPathHead <> "officedocument.spreadsheetml.styles+xml"
+  , orPartName = "/xl/styles.xml"
   }
 
 orCore :: Override
 orCore = Override
-  { orContentType="application/vnd.openxmlformats-package.core-properties+xml"
-  , orPartName="/docProps/core.xml"
+  { orContentType = appPathHead <> "package.core-properties+xml"
+  , orPartName = "/docProps/core.xml"
   }
 
 orApp :: Override
 orApp = Override
-  { orContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"
-  , orPartName="/docProps/app.xml"
+  { orContentType = appPathHead <> "officedocument.extended-properties+xml"
+  , orPartName = "/docProps/app.xml"
   }
 
 orRels :: Override
 orRels = Override
-  { orContentType="application/vnd.openxmlformats-package.relationships+xml"
-  , orPartName="/_rels/.rels"
+  { orContentType = appPathHead <> "package.relationships+xml"
+  , orPartName = "/_rels/.rels"
   }
 
 overrides :: [Override]
@@ -80,113 +100,107 @@ overrides =
   , orRels
   ]
 
+appHeadingPairs :: Int -> [AppVariant]
+appHeadingPairs i =
+  [ AppVariant VarLpstr "Листы"
+  , AppVariant VarI4 (pack $ show i)
+  ]
+
+appTitlesOfParts :: [Text] -> [XMLTag]
+appTitlesOfParts wsNames = map (\x -> valueTag "vt:lpstr" x) wsNames
+
+
+emptyStyle :: CellXf
+emptyStyle = CellXf
+  { border    = Nothing
+  , fill      = Nothing
+  , font      = Nothing
+  , numFmt    = Nothing
+  , alignment = Nothing
+  }
+
+
 defStyle :: CellXf
 defStyle = CellXf
   { border    = Just defBorder
   , fill      = Nothing
-  , font      = Just $ Font "Helvetica Neue" False False 12 "000000" VCenter
+  , font      = Just $ Font "Times New Roman" False False 12 "000000" Baseline
   , numFmt    = Nothing
   , alignment = Nothing
   }
+
+defOutStyle :: CellXf
+defOutStyle = defStyle { border = Just defOutBorder }
 
 defTopStyle :: CellXf
-defTopStyle = CellXf
-  { border    = Just defTopBorder
-  , fill      = Nothing
-  , font      = Just $ Font "Helvetica Neue" False False 12 "000000" VCenter
-  , numFmt    = Nothing
-  , alignment = Nothing
-  }
+defTopStyle = defStyle { border = Just defTopBorder }
 
 defBottomStyle :: CellXf
-defBottomStyle = CellXf
-  { border    = Just defBottomBorder
-  , fill      = Nothing
-  , font      = Just $ Font "Helvetica Neue" False False 12 "000000" VCenter
-  , numFmt    = Nothing
-  , alignment = Nothing
-  }
+defBottomStyle = defStyle { border = Just defBottomBorder }
 
 defLeftStyle :: CellXf
-defLeftStyle = CellXf
-  { border    = Just defLeftBorder
-  , fill      = Nothing
-  , font      = Just $ Font "Helvetica Neue" False False 12 "000000" VCenter
-  , numFmt    = Nothing
-  , alignment = Nothing
-  }
+defLeftStyle = defStyle { border = Just defLeftBorder }
 
 defRightStyle :: CellXf
-defRightStyle = CellXf
-  { border    = Just defRightBorder
-  , fill      = Nothing
-  , font      = Just $ Font "Helvetica Neue" False False 12 "000000" VCenter
-  , numFmt    = Nothing
-  , alignment = Nothing
-  }
+defRightStyle = defStyle { border = Just defRightBorder }
 
 defBorder :: Border
 defBorder = Border
-  { borderStyles =
-     [
-       Just $ BorderStyle BLeft Thin (RGB "ffffff")
-     , Just $ BorderStyle BRight Thin (RGB "ffffff")
-     , Just $ BorderStyle BTop Thin (RGB "ffffff")
-     , Just $ BorderStyle BBottom Thin (RGB "ffffff")
-     , Just $ BorderStyle BDiagonal Thin (RGB "ffffff")
-     ]
+  { borderStyles = map borderStyleGray
+     [BLeft, BRight, BTop, BBottom, BDiagonal]
+  }
+
+defOutBorder :: Border
+defOutBorder = Border
+  { borderStyles = map borderStyleWhite
+     [BLeft, BRight, BTop, BBottom, BDiagonal]
   }
 
 defTopBorder :: Border
 defTopBorder = Border
-  { borderStyles =
-     [
-       Just $ BorderStyle BLeft Thin (RGB "ffffff")
-     , Just $ BorderStyle BRight Thin (RGB "ffffff")
-     , Just $ BorderStyle BTop Thin (RGB "ffffff")
-     , Just $ BorderStyle BBottom Thin (RGB "808080")
-     , Just $ BorderStyle BDiagonal Thin (RGB "ffffff")
-     ]
+  { borderStyles = oneSideGray BBottom
   }
 
 defBottomBorder :: Border
 defBottomBorder = Border
-  { borderStyles =
-     [
-       Just $ BorderStyle BLeft Thin (RGB "ffffff")
-     , Just $ BorderStyle BRight Thin (RGB "ffffff")
-     , Just $ BorderStyle BTop Thin (RGB "808080")
-     , Just $ BorderStyle BBottom Thin (RGB "ffffff")
-     , Just $ BorderStyle BDiagonal Thin (RGB "ffffff")
-     ]
+  { borderStyles = oneSideGray BTop
   }
 
 defLeftBorder :: Border
 defLeftBorder = Border
-  { borderStyles =
-     [
-       Just $ BorderStyle BLeft Thin (RGB "ffffff")
-     , Just $ BorderStyle BRight Thin (RGB "808080")
-     , Just $ BorderStyle BTop Thin (RGB "ffffff")
-     , Just $ BorderStyle BBottom Thin (RGB "ffffff")
-     , Just $ BorderStyle BDiagonal Thin (RGB "ffffff")
-     ]
+  { borderStyles = oneSideGray BRight
   }
 
 defRightBorder :: Border
 defRightBorder = Border
-  { borderStyles =
-     [
-       Just $ BorderStyle BLeft Thin (RGB "808080")
-     , Just $ BorderStyle BRight Thin (RGB "ffffff")
-     , Just $ BorderStyle BTop Thin (RGB "ffffff")
-     , Just $ BorderStyle BBottom Thin (RGB "ffffff")
-     , Just $ BorderStyle BDiagonal Thin (RGB "ffffff")
-     ]
+  { borderStyles = oneSideGray BLeft
   }
+
+oneSideGray :: BorderSide -> [Maybe BorderStyle]
+oneSideGray bSide =
+     (
+      borderStyleGray bSide
+      :
+      map borderStyleWhite (filter (/=bSide) allSides)
+     )
+
+allSides :: [BorderSide]
+allSides = [BLeft, BRight, BTop, BBottom, BDiagonal]
+
+borderStyleGray :: BorderSide -> Maybe BorderStyle
+borderStyleGray bSide = Just $ BorderStyle bSide Thin (RGB "808080")
+
+borderStyleWhite :: BorderSide -> Maybe BorderStyle
+borderStyleWhite bSide = Just $ BorderStyle bSide Thin (RGB "ffffff")
 
 defRowConfig :: RowConfig
 defRowConfig = RowConfig False True False False 20 1
 
 fileHeader :: ByteString
 fileHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"  standalone=\"yes\"?>"
+
+urlHeader :: URL
+urlHeader = "http://schemas.openxmlformats.org/"
+
+appPathHead :: FilePath
+appPathHead = "application/vnd.openxmlformats-"

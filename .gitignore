@@ -1,0 +1,5 @@
+.stack-work/
+simple-excel.cabal
+.DS_Store
+*.xlsx
+*~

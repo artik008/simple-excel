@@ -14,6 +14,7 @@ import           Data.Maybe
 import           Data.String.Conversions
 import           Data.Text               (Text)
 import qualified Data.Text               as T
+import           Data.Time
 import           NeatInterpolation
 import           System.Directory
 
@@ -25,6 +26,7 @@ import           Models
 
 createXlsx :: FilePath -> Xlsx -> IO BSL.ByteString
 createXlsx fname xlsx@Xlsx{..} = do
+  now <- getCurrentTime
   files <- filesInDir fname
   let WithHistory indWorksheets indStyles sharedStrings =
         foldl
@@ -51,6 +53,9 @@ createXlsx fname xlsx@Xlsx{..} = do
             ,("[Content_Types].xml", createContentTypes (length worksheets))
             ,("xl/sharedStrings.xml", createSharedStrings sharedStrings)
             ,("xl/styles.xml", createStylesFile indStyles)
+            ,("docProps/app.xml", createApp xlsx)
+            ,("docProps/core.xml", createCore now)
+            ,("_rels/.rels", createRels)
             ]
           )
         )
@@ -79,8 +84,8 @@ test = do
 headerStyle :: CellXf
 headerStyle = CellXf
   { border    = Just grayBorder
-  , fill      = Just $ Fill "solid" "000000"
-  , font      = Just $ Font "Helvetica Neue" True False 14 (RGB "f5e14c") VCenter
+  , fill      = Just $ Fill "solid" "000000" "000000"
+  , font      = Just $ Font "Helvetica Neue" True False 14 (RGB "f5e14c") Baseline
   , numFmt    = Nothing
   , alignment = Just $ Alignment HCenter VCenter "1"
   }
@@ -107,34 +112,33 @@ testTable = Xlsx
       , wsStyleFix       = True
       , wsCells          = fromList
         [
-          ((1,1), Cell (Just $ CellText "0")                   headerStyle)
-        , ((1,2), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
-        , ((1,3), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
-        , ((2,1), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
-        , ((2,2), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
-        , ((2,3), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
-        , ((3,1), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
-        , ((3,2), Cell (Just $ CellFloat 40.2)                 defStyle{border = Just grayBorder})
-        , ((3,3), Cell (Just $ CellFormula "A1/B2" (Just "0")) headerStyle)
+          ((1,1), Cell (Just $ CellText "0") headerStyle)
+        , ((2,2), Cell (Just $ CellFloat 40.2) defStyle{border = Just grayBorder})
+        , ((3,3), Cell (Just $ CellFormula "B2/B2" (Just "1")) headerStyle)
         ]
-      , wsRowsConfig     = empty
-        -- fromList
-          -- [ (1, RowConfig False True False False 30 1)
-          -- , (2, RowConfig False True False False 50 1)
-          -- , (3, RowConfig False True False False 30 1)
-          -- ]
-      , wsColumnsConfigs = []
-      , wsMergeCells     = [Merge ((1,1),(3,1))]
-      , wsPageSetups = []
-      , wsSheetViews = [SheetView 1 1 1]
-      , wsSheetFormat = SheetFormat
-        { sfCustomHeight     = 1
+      , wsRowsConfig     = fromList
+          [ (1, RowConfig False True False False 30 0)
+          , (2, RowConfig False True False False 50 0)
+          , (3, RowConfig False True False False 30 0)
+          ]
+      , wsColumnsConfigs =
+        [
+          ColumnConfig False False 5 1 25 1
+        , ColumnConfig False False 256 6 10 1
+        ]
+      , wsMergeCells         = [Merge ((1,1),(3,1))]
+      , wsPageSetupPrs       = [PageSetupPr 1]
+      , wsSheetViews         = [SheetView 1 1 0]
+      , wsSheetFormat        = SheetFormat
+        { sfCustomHeight     = True
         , sfDefaultColWidth  = 8
         , sfDefaultRowHeight = 12.75
         , sfOutlineLevelCol  = 0
         , sfOutlineLevelRow  = 0
-        , sfX14Descent       = 0.25
+        -- , sfX14Descent       = 0.25
         }
+      , wsPageMargins = PageMargins 1 0.25 0.25 1 1 1
+      , wsPageSetup = PageSetup 1 1 1 OrPortrait PODownThenOver 100 False
       }
 
 

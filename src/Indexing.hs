@@ -79,9 +79,11 @@ addIndWorkSheet (WithHistory l indexedStyles sharedStrings) Worksheet{..} =
       , iwsRows           = reverse indexedRows
       , iwsColumnsConfigs = wsColumnsConfigs
       , iwsMergeCells     = fMergeCells
-      , iwsPageSetups     = wsPageSetups
+      , iwsPageSetupPrs   = wsPageSetupPrs
       , iwsSheetViews     = wsSheetViews
       , iwsSheetFormat    = wsSheetFormat
+      , iwsPageMargins    = wsPageMargins
+      , iwsPageSetup       = wsPageSetup
       }
     WithHistory indexedRows newIndStyles newSharedStrings =
       foldl addIndexedRow (WithHistory [] indexedStyles sharedStrings) rowsList
@@ -137,7 +139,8 @@ fillCells cells merges range actRange =
       | x >= aminC && x <= amaxC && y == (amaxR + 1) = defBottomStyle
       | y >= aminR && y <= amaxR && x == (aminC - 1) = defLeftStyle
       | y >= aminR && y <= amaxR && x == (amaxC + 1) = defRightStyle
-      | otherwise = defStyle
+      | x <= amaxC && x >= aminC && y <= amaxR && y >= aminR = defStyle
+      | otherwise = defOutStyle
 
 setMergeStyle :: Map CellCoords Cell -> Merge -> Map CellCoords Cell
 setMergeStyle cells (Merge ((mC1, mR1), (mC2, mR2))) =

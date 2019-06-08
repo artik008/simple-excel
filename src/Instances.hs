@@ -1,7 +1,9 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE OverloadedStrings  #-}
+{-# LANGUAGE RecordWildCards    #-}
+{-# LANGUAGE StandaloneDeriving #-}
 module Instances where
 
+import qualified Data.ByteString.Lazy    as BSL
 import           Data.Char               (toLower)
 import           Data.List               (find, intercalate, sortOn)
 import           Data.Maybe              (catMaybes, fromJust, isJust)
@@ -60,7 +62,9 @@ instance ToExcelXML Fill where
     <++
     ( simpleTag ("patternFill", [("patternType", cs fillType)])
     <++
-      simpleTag ("fgColor", [("rgb", show fillColor)])
+      simpleTag ("fgColor", [("rgb", show fillFgColor)])
+    <++
+      simpleTag ("bgColor", [("rgb", show fillBgColor)])
     )
 
 instance ToExcelXML Font where
@@ -120,12 +124,12 @@ instance ToExcelXML SheetFormat where
   toTag SheetFormat{..} =
     simpleTag
       ( "sheetFormatPr"
-      , [ ("customHeight", show sfCustomHeight)
+      , [ ("customHeight", boolToSInt sfCustomHeight)
         , ("defaultColWidth", show sfDefaultColWidth)
         , ("defaultRowHeight", show sfDefaultRowHeight)
         , ("outlineLevelCol", show sfOutlineLevelCol)
         , ("outlineLevelRow", show sfOutlineLevelRow)
-        , ("x14ac:dyDescent", show sfX14Descent)
+        -- , ("x14ac:dyDescent", show sfX14Descent)
         ]
       )
 
@@ -139,10 +143,43 @@ instance ToExcelXML SheetView where
         ]
       )
 
+instance ToExcelXML PageSetupPr where
+  toTag PageSetupPr{..} =
+    simpleTag ("pageSetUpPr", [("fitToPage", show psprFitToPage)])
+
+instance ToExcelXML PageMargins where
+  toTag PageMargins{..} =
+    simpleTag
+      ( "pageMargins"
+      , [ ("bottom", show pmBottom)
+        , ("footer", show pmFooter)
+        , ("header", show pmHeader)
+        , ("left"  , show pmLeft)
+        , ("right" , show pmRight)
+        , ("top"   , show pmTop)
+        ]
+      )
+
 instance ToExcelXML PageSetup where
   toTag PageSetup{..} =
-    simpleTag ("pageSetUpPr", [("fitToPage", show psFitToPage)])
+    simpleTag
+      ( "pageSetup"
+      , [ ("firstPageNumber", show psFirstPageNumber)
+        , ("fitToHeight", show psFitToHeight)
+        , ("fitToWidth", show psFitToWidth)
+        , ("orientation", show psOrientation)
+        , ("pageOrder", show psPageOrder)
+        , ("scale", show psScale)
+        , ("useFirstPageNumber", boolToSInt psUseFirstPageNumber)
+        ]
+      )
 
+
+
+instance ToExcelXML AppVariant where
+  toTag AppVariant{..} =
+    valueTag "vt:variant"
+      (valueTag ("vt:" ++ ((drop 3).showToLower) variantType) variantValue)
 
 -- | Rows and Columns
 
@@ -150,10 +187,11 @@ instance ToExcelXML ColumnConfig where
   toTag ColumnConfig{..} =
     simpleTag
       ( "col"
-      , [ ("bestFit", show columnBestFit)
-        , ("customWidth", show columnCustomWidth)
+      , [ ("bestFit", showToLower columnBestFit)
+        , ("customWidth", showToLower columnCustomWidth)
         , ("max", show columnLastColumn)
         , ("min", show columnFirstColumn)
+        -- , ("style", show columnStyle)
         , ("width", show columnWidth)
         ]
       )
@@ -164,7 +202,7 @@ instance ToExcelXML IndRow where
       ("row",
        [ ("collapsed", showToLower rowCollapsed)
        , ("customFormat", showToLower rowCustomFmt)
-       , ("customHeight", showToLower rowCustomHeight)
+       , ("customHeight", boolToSInt rowCustomHeight)
        , ("hidden", showToLower rowHidden)
        , ("ht", show rowHeight)
        , ("outlineLevel", show rowOutlineLevel)
@@ -202,8 +240,14 @@ instance ToExcelXML IndCellValue where
 instance ToExcelXML Merge where
   toTag (Merge m) = simpleTag ("mergeCell", [("ref", coordsToSRange m)])
 
+
+-- | XMLTag
+
 instance ToExcelXML Text where
   toTag = XMLText
+
+instance ToExcelXML Bool where
+  toTag = XMLBool
 
 instance ToExcelXML Int where
   toTag = XMLInt
